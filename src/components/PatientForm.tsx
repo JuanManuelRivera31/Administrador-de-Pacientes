@@ -1,13 +1,15 @@
 import { useForm } from 'react-hook-form';
 import Error from './Error';
 import type { DraftPatient } from '../types';
+import { usePatientStore } from '../store';
 
 export default function PatientForm() {
 
+    const addPatient = usePatientStore(state => state.addPatient);
     const { register, handleSubmit, formState: {errors}} = useForm<DraftPatient>(); //Cada que se genere el formulario debe tener type DraftPatient
   
     const registerPatient = (data: DraftPatient) => { //Funcion que se encarga de manejar toda la lógica y recuperar valores
-        
+        addPatient(data)
     }
 
   return (
