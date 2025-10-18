@@ -2,14 +2,36 @@ import { useForm } from 'react-hook-form';
 import Error from './Error';
 import type { DraftPatient } from '../types';
 import { usePatientStore } from '../store';
+import { useEffect } from 'react';
 
 export default function PatientForm() {
 
     const addPatient = usePatientStore(state => state.addPatient);
-    const { register, handleSubmit, formState: {errors}} = useForm<DraftPatient>(); //Cada que se genere el formulario debe tener type DraftPatient
+    const activeId = usePatientStore(state => state.activeId);
+    const patients = usePatientStore(state => state.patients);
+    const updatePatient = usePatientStore(state => state.updatePatient);
+
+    const { register, handleSubmit, setValue, formState: {errors}, reset} = useForm<DraftPatient>(); //Cada que se genere el formulario debe tener type DraftPatient
   
+    useEffect(() => {
+        if(activeId) {
+            const activePatient = patients.filter( patient => patient.id === activeId)[0]
+            setValue('name', activePatient.name);
+            setValue('caretaker', activePatient.caretaker);
+            setValue('date', activePatient.date);
+            setValue('email', activePatient.email);
+            setValue('symptoms', activePatient.symptoms);
+        }
+    }, [activeId]) //Cada que activeId cambie, se ejecuta el useEffect
+
     const registerPatient = (data: DraftPatient) => { //Funcion que se encarga de manejar toda la lógica y recuperar valores
-        addPatient(data)
+        if(activeId) {
+            updatePatient(data);
+        } else {
+            addPatient(data)
+        }
+
+        reset(); //Limpia el formulario después de enviarlo
     }
 
   return (
@@ -139,7 +161,7 @@ export default function PatientForm() {
 
             <input
                 type="submit"
-                className="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors"
+                className="bg-indigo-600 w-full p-3 text-white uppercase font-bold hover:bg-indigo-700 cursor-pointer transition-colors rounded-lg"
                 value='Guardar Paciente'
             />
         </form> 
